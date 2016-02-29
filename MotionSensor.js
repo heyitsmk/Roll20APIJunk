@@ -239,8 +239,8 @@ var MotionSensor = MotionSensor || (function() {
 			debug("Removing sensor token for target: " + target.targetId);
 			var st = getObj("graphic", target.sensorTokenId);
 			if (st) {
-				st.remove();
-				delete state.MotionSensor.ignoreTargets[st.sensorTokenId];
+				st.remove();				
+				delete state.MotionSensor.ignoreTargets[target.sensorTokenId];
 			}
 		});
 		debug("All sensor tokens removed for sensor: " + id);
@@ -386,6 +386,11 @@ var MotionSensor = MotionSensor || (function() {
 			debug("Destroyed graphic had attached sensor, destroying sensor");
 			destroySensor(obj.id);
 		}
+		found = state.MotionSensor.ignoreTargets[obj.id];
+		if (found) {
+			debug("Destroyed an ignored target, deleting from ingoreTargets");
+			delete state.MotionSensor.ignoreTargets[obj.id];
+		}
  	},
 
  	handleInput = function(msg) {
@@ -514,6 +519,9 @@ var MotionSensor = MotionSensor || (function() {
 				state.MotionSensor.blipSource = "";
 				message("MotionSensor has been reset to initial state. You will need to reconfigure the image source and any sensors");
 				break;
+			case '!ignored':
+				message("There are " + _.size(state.MotionSensor.ignoreTargets) + " ignored targets");
+				break;
 		}
  	},
 
@@ -578,14 +586,14 @@ var MotionSensor = MotionSensor || (function() {
  		debug("Found " + n + " ignored targets");
 
  		n = 0;
- 		debug("Updating target token references");
+ 		debug("Reinitializing sensors");
  		_.each(state.MotionSensor.activeSensors, function(sensor){
- 			_.each(sensor.sensorTargets, function(target){
- 				n = n + 1;
- 				target.sensorToken = getObj("graphic", target.sensorTokenId);
- 			})
+ 			n = n + 1;
+ 			var range = sensor.range;
+ 			destroySensor(sensor.id);
+ 			createSensor(getObj("graphic", sensor.id), range);
  		});
- 		debug("Updated " + n + " token references");
+ 		debug("Reinitialized " + n + " sensors");
 
  		debug("Pulse Cyclic: " + state.MotionSensor.pulseCyclic);
  		debug("Pulse Min Size Ratio: " + (state.MotionSensor.pulseMinSizeRatio * 100) + "%");
