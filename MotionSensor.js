@@ -526,10 +526,7 @@ var MotionSensor = MotionSensor || (function() {
  	},
 
  	initialize = function () {
-		debug("In initialize");
-
 		if (!_.has(state, "MotionSensor")) {
-			debug("No MotionSensor instance found in state object. Creating instance.");
 			state.MotionSensor = {
 				version: scriptVersion,
 				blipSource: '',
@@ -547,7 +544,6 @@ var MotionSensor = MotionSensor || (function() {
 		}
 
 		if (state.MotionSensor.version !== scriptVersion) {
-			debug("Newer version of MotionSensor script detected. Disposing old instance and creating new.");			
 			var sensorIds = _.map(state.MotionSensor.activeSensors, function (sensor) {
 				return sensor.id;
 			});
